@@ -1,0 +1,42 @@
+﻿using Fereira.Costa.Domain.Entities;
+using Fereira.Costa.Shared.Validations;
+using Fereira.Costa.Shared.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Authentication;
+using CommonSignInResult = Fereira.Costa.Application.Features.Authentication.Commands.SignInResult;
+using Fereira.Costa.Domain.Infrastructure.Interfaces.Adapters;
+using Fereira.Costa.Domain.Infrastructure.Interfaces.Repositories;
+using MediatR;
+
+namespace Fereira.Costa.Application.Features.Authentication.Commands;
+public sealed class SignInCommandHandler(IUserRepository userRepository, IAuthenticationService authenticationService, IJwtService jwtService, SignInManager<User> signInManager, IClaimsService claimsService) : IRequestHandler<SignInCommand, MutationResult<CommonSignInResult>>
+{
+    public async Task<MutationResult<CommonSignInResult>> Handle(SignInCommand input, CancellationToken ct)
+    {
+        var user = await userRepository.GetUserAsync(input.Email, ct, true)
+         ?? throw new AuthenticationException(ValidationMessages.DefaultAuthenticationError);
+
+        var result = await signInManager.CheckPasswordSignInAsync(user, input.Password, false);
+
+        if (result.Succeeded)
+        {
+            var (accessToken, refreshTokenHash) = jwtService.CreateJwt(claimsService.GenerateClaims(user));
+
+            await authenticationService.CreateRefreshTokenAsync(new RefreshToken()
+            {
+                UserRefId = user.RefId,
+                TokenHash = refreshTokenHash
+            }, ct);
+
+            return MutationResult<CommonSignInResult>.Ok("Usuário autenticado com sucesso", new CommonSignInResult(accessToken, refreshTokenHash));
+        }
+
+        if (result.IsNotAllowed) throw new Exception(ValidationMessages.IsNotAllowed);
+
+        if (result.IsLockedOut) throw new ArgumentException(ValidationMessages.UserLockedOut);
+
+        throw new ArgumentException(ValidationMessages.DefaultAuthenticationError);
+    }
+}
+
+
