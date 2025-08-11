@@ -29,6 +29,27 @@ if (builder.Environment.IsDevelopment())
     });
 
 }
+else
+{
+    Console.WriteLine(builder.Configuration.GetValue<string>("WEBSITE_CORS_ALLOWED_ORIGINS"));
+
+    Console.WriteLine(builder.Configuration.GetValue<string>("DATABASE_URI"));
+
+    builder.Services.AddCors(options =>
+    {
+        var allowedOrigins = builder.Configuration.GetValue<string>("WEBSITE_CORS_ALLOWED_ORIGINS")?.Split(",");
+        options.AddDefaultPolicy(policy =>
+        {
+            if (allowedOrigins != null && allowedOrigins.Length > 0)
+            {
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyMethod()
+                      .AllowAnyHeader()
+                      .AllowCredentials();
+            }
+        });
+    });
+}
 
 var app = builder.Build();
 
@@ -67,7 +88,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions()
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-   
+
 }
 else
 {
