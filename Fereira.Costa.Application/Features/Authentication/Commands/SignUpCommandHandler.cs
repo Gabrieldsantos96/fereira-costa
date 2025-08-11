@@ -24,7 +24,7 @@ public sealed class SignUpCommandHandler(UserManager<User> userManager, IPasswor
             zipcode: input.Command.Zipcode,
             number: input.Command.Number,
             city: input.Command.City,
-            geo: input.Command.Geo,
+            geo: input.Command.Geolocation,
             emailConfirmed: true
             );
 

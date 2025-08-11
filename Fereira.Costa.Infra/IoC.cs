@@ -14,9 +14,11 @@ public static class ConfigureServices
 {
     public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
+
+
         services.AddDbContextFactory<DatabaseContext>(options =>
         {
-            options.UseSqlServer(configuration["DatabaseContext"], sqlBuilder =>
+            options.UseSqlServer(configuration["DATABASE_URI"], sqlBuilder =>
             {
                 sqlBuilder.EnableRetryOnFailure();
                 sqlBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);

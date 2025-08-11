@@ -9,6 +9,8 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.AddWebServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -29,6 +31,7 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+
 
 app.UseCors();
 

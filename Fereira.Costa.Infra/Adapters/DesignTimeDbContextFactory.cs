@@ -1,20 +1,27 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Fereira.Costa.Infra.Adapters;
-public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<DatabaseContext>
+namespace Fereira.Costa.Infra.Adapters
 {
-    public DatabaseContext CreateDbContext(string[] args)
+    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<DatabaseContext>
     {
-        string connectionString = "Server=sqlserver;Database=AmbevDb;User Id=sa;Password=YourStrong@Passw0rd;MultipleActiveResultSets=True;TrustServerCertificate=True;";
-
-        var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
-        optionsBuilder.UseSqlServer(connectionString, builder =>
+        public DatabaseContext CreateDbContext(string[] args)
         {
-            builder.EnableRetryOnFailure(3);
-            builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-        });
+            string connectionString = Environment.GetEnvironmentVariable("DATABASE_URI")!;
 
-        return new DatabaseContext(optionsBuilder.Options);
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("A variável de ambiente DATABASE_URI não foi encontrada. Defina-a no ambiente ou no Azure.");
+            }
+
+            var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
+            optionsBuilder.UseSqlServer(connectionString, builder =>
+            {
+                builder.EnableRetryOnFailure(3);
+                builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
+
+            return new DatabaseContext(optionsBuilder.Options);
+        }
     }
 }

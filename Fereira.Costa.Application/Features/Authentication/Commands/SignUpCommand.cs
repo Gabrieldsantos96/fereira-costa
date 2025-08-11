@@ -18,7 +18,7 @@ public record SignUpDto
     public string Zipcode { get; set; } = null!;
     public string Number { get; set; } = null!;
     public string City { get; set; } = null!;
-    public string Geo { get; set; } = null!;
+    public string Geolocation { get; set; } = null!;
     public string Password { get; set; } = null!;
 }
 public record SignUpCommand : IRequest<MutationResult<object>>

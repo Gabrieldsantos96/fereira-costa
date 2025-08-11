@@ -12,7 +12,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - SqlServer=Server=sqlserver;Database=AmbevDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - SqlServer=Server=sqlserver;Database=FereiraDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=True
     depends_on:
       - sqlserver
     restart: always

@@ -63,9 +63,6 @@ public class AddressValidator : AbstractValidator<Address>
             .MaximumLength(100).WithMessage(ValidationHelper.MaxLengthErrorMessage("Cidade", 100));
 
         RuleFor(x => x.Geolocation)
-            .NotNull().WithMessage(ValidationHelper.RequiredErrorMessage("Geolocalização"));
-
-        RuleFor(x => x.Geolocation)
             .NotEmpty().WithMessage(ValidationHelper.RequiredErrorMessage("Latitude - Longitude"))
             .MaximumLength(50).WithMessage(ValidationHelper.MaxLengthErrorMessage("Latitude", 50));
     }
