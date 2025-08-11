@@ -15,6 +15,8 @@ builder.Services.AddWebServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+builder.Services.AddResponseCompression();
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddCors(options =>
