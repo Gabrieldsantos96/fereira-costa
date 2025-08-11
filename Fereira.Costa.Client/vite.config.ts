@@ -8,8 +8,6 @@ import svgr from "vite-plugin-svgr";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
-export const API_HTTP_URL = import.meta.env.VITE_API_URL;
-
 export default defineConfig({
   build: {
     outDir: "build",

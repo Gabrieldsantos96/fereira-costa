@@ -9,22 +9,14 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "~/components/ui/button";
 import {
   ArrowUpDown,
-  Badge,
   Edit,
   Loader2,
   MapPin,
-  MoreHorizontal,
   Phone,
   Search,
   Trash2,
   User,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "~/components/ui/dropdown-menu";
 import { DataTable } from "~/components/data-table";
 import { TablePagination } from "~/components/table-pagination";
 import { useDeleteUser, useUsers } from "~/hooks/tanstack-hooks/use-user";

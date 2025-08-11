@@ -1,11 +1,5 @@
-import { cn } from "~/lib/utils";
-import {
-  createFileRoute,
-  Link,
-  Outlet,
-  useRouter,
-} from "@tanstack/react-router";
-import { BarChart3, Package, TrendingUp, Users } from "lucide-react";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { BarChart3, Package, Users } from "lucide-react";
 import { Header } from "~/components/header";
 import { Authorize } from "~/guards/guards";
 import { IUserRole } from "~/interfaces/IUserProfileDto";
