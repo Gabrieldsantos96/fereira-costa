@@ -1,6 +1,6 @@
 import axios from "axios";
-// @ts-expect-error false positive
-export const API_HTTP_URL = import.meta.env.VITE_API_URL;
+
+export const API_HTTP_URL = "/api";
 
 const httpClient = axios.create({
   baseURL: API_HTTP_URL,
