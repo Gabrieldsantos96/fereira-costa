@@ -67,7 +67,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions()
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    app.UseSwaggerGen();
+   
 }
 else
 {
@@ -75,6 +75,7 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseSwaggerGen();
 app.MapStaticAssets();
 app.UseRouting();
 app.UseAuthentication();
