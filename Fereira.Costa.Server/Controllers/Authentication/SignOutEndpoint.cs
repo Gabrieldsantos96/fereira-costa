@@ -10,7 +10,7 @@ public class SignOutEndpoint(IMediator mediator) : Endpoint<SignOutDto, Mutation
     public override void Configure()
     {
         Post(ApiRoutes.Authentication.SignOut);
-        Roles(RoleConsts.User);
+        AllowAnonymous();
     }
 
     public override async Task HandleAsync(SignOutDto req, CancellationToken ct)
