@@ -1,9 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  IUserProfileDto,
-  IUserRole,
-  USER_ROLE,
-} from "~/interfaces/IUserProfileDto";
+  createFileRoute,
+  Link,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
+import { IUserProfileDto, IUserRole } from "~/interfaces/IUserProfileDto";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "~/components/ui/button";
 import {
@@ -13,11 +14,11 @@ import {
   Loader2,
   MapPin,
   MoreHorizontal,
+  Phone,
   Search,
   Trash2,
   User,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -25,7 +26,6 @@ import {
   DropdownMenuItem,
 } from "~/components/ui/dropdown-menu";
 import { DataTable } from "~/components/data-table";
-import { cn } from "~/lib/utils";
 import { TablePagination } from "~/components/table-pagination";
 import { useDeleteUser, useUsers } from "~/hooks/tanstack-hooks/use-user";
 import { Input } from "~/components/ui/input";
@@ -37,6 +37,8 @@ import { openDialog } from "~/utils/trigger-dialog";
 import { MessageType } from "~/services/toast-service";
 import { showToast } from "~/utils/trigger-toast";
 import { handleError } from "~/utils/handle-error";
+import { applyMask } from "~/utils/apply-mask";
+import { useDebounce } from "~/hooks/use-debouce";
 
 const userSearchSchema = z.object({
   searchTerm: z.string().catch(""),
@@ -46,11 +48,7 @@ const userSearchSchema = z.object({
 
 export const Route = createFileRoute("/_authenticated/_authenticated/users/")({
   validateSearch: userSearchSchema,
-  component: Authorize(RouteComponent, [
-    IUserRole.ADMIN,
-    IUserRole.CLIENT,
-    IUserRole.MANAGER,
-  ]),
+  component: Authorize(RouteComponent, [IUserRole.USER]),
 });
 
 function RouteComponent() {
@@ -58,7 +56,15 @@ function RouteComponent() {
 
   const navigate = useNavigate();
 
-  const { data: result, isFetching, isError } = useUsers(skip, pageSize);
+  const router = useRouter();
+
+  const values = useDebounce({ searchTerm, skip, pageSize }, 500);
+
+  const {
+    data: result,
+    isFetching,
+    isError,
+  } = useUsers(values.skip, values.pageSize, values.searchTerm);
 
   const { mutateAsync } = useDeleteUser();
 
@@ -75,7 +81,7 @@ function RouteComponent() {
     try {
       const result = await openDialog(DestructiveDialog, {
         componentProps: {
-          message: "Deseja confirmar do usuário?",
+          message: "Deseja confirmar exclusão do usuário?",
           variant: "destructive",
         },
       });
@@ -128,17 +134,13 @@ function RouteComponent() {
         const name = row.original.name;
         return (
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage
-                src={`/placeholder.svg?height=40&width=40&text=${name.firstName.charAt(0)}`}
-              />
-              <AvatarFallback>
-                {name.firstName.charAt(0)}
-                {name.lastName.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="h-10 w-10 flex items-center justify-center rounded-full bg-accent">
+              {name.firstName.charAt(0)}
+            </div>
             <div>
-              <div className="font-medium">{`${name.firstName} ${name.lastName}`}</div>
+              <div className="font-medium">
+                {`${name.firstName} ${name.lastName}`}
+              </div>
               <div className="text-sm text-muted-foreground">
                 {row.original.email}
               </div>
@@ -157,6 +159,19 @@ function RouteComponent() {
     {
       accessorKey: "phone",
       header: "Telefone",
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <div>
+              <div className="font-medium">{}</div>
+              <div className="text-sm text-muted-foreground">
+                {applyMask(row.original.phone, "(99) 99999-9999")}
+              </div>
+            </div>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "address",
@@ -188,32 +203,34 @@ function RouteComponent() {
       enableHiding: false,
       cell: ({ row }) => {
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Abrir menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="text-red-600"
-                onClick={() => handleDelete(row.original.refId!)}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/users/edit/$userId"
+              params={{ userId: row.original.refId! }}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                aria-label={`Editar usuário ${row.original.name.firstName} ${row.original.name.lastName}`}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  to={"/users/edit/$userId"}
-                  params={{ userId: row.original.refId! }}
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <Edit className="h-4 w-4" />
+              </Button>
+            </Link>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(row.original.refId!);
+              }}
+              aria-label={`Excluir usuário ${row.original.name.firstName} ${row.original.name.lastName}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         );
       },
     },
@@ -231,8 +248,11 @@ function RouteComponent() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex items-center justify-between">
           <CardTitle>Lista de Usuários</CardTitle>
+          <Link to="/users/create">
+            <Button>Adicionar usuário</Button>
+          </Link>
         </CardHeader>
         <CardContent className="p-0">
           <div className="p-6 pb-4">
@@ -290,7 +310,7 @@ function RouteComponent() {
                   currentPage={result.currentPage}
                   totalPages={result.totalPages}
                   totalCount={result.totalItems}
-                  pageSize={result.data.length}
+                  pageSize={pageSize}
                   onPageChange={handlePageChange}
                   onPageSizeChange={handlePageSizeChange}
                   isLoading={isFetching}

@@ -24,31 +24,6 @@ public class User : IdentityUser<int>
     public DateTime UpdatedAt { get; set; }
     public User() { }
     public static User Create(
-        string email,
-        string userName,
-        Name name,
-        Cpf cpf,
-        Address address,
-        string phone)
-    {
-        var user = new User
-        {
-            Email = email,
-            UserName = userName,
-            Name = name,
-            Address = address,
-            Phone = phone,
-            Cpf = cpf,
-            RefId = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        new UserValidator().ValidateAndThrow(user);
-        return user;
-    }
-
-    public static User Create(
         DateTime birthDay,
         string naturalness,
         string nationality,
@@ -61,7 +36,8 @@ public class User : IdentityUser<int>
         string zipcode,
         string city,
         string geo,
-        string number
+        string number,
+        bool emailConfirmed = false
         )
     {
         var user = new User
@@ -76,7 +52,7 @@ public class User : IdentityUser<int>
             Phone = phone,
             Cpf = cpf,
             LockoutEnabled = false,
-            EmailConfirmed = true,
+            EmailConfirmed = emailConfirmed,
             RefId = Guid.NewGuid(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -95,7 +71,8 @@ public class User : IdentityUser<int>
         Name? name = null,
         Cpf? cpf = null,
         Address? address = null,
-        string? phone = null)
+        string? phone = null
+        )
     {
         static T ThrowIfNull<T>(T? value, string property) where T : class
             => value ?? throw new DomainException(ValidationHelper.RequiredErrorMessage(property));
@@ -160,14 +137,6 @@ public class UserValidator : AbstractValidator<User>
 
         RuleFor(x => x.BirthDay)
            .NotEmpty().WithMessage(ValidationHelper.RequiredErrorMessage("Data de nascimento"));
-
-        RuleFor(x => x.Naturalness)
-           .NotEmpty().WithMessage(ValidationHelper.RequiredErrorMessage("Naturalidade"))
-           .MaximumLength(100).WithMessage(ValidationHelper.MaxLengthErrorMessage("Naturalidade", 100)).When(x => x.Naturalness != null);
-
-        RuleFor(x => x.Nationality)
-           .NotEmpty().WithMessage(ValidationHelper.RequiredErrorMessage("Nacionalidade"))
-           .MaximumLength(100).WithMessage(ValidationHelper.MaxLengthErrorMessage("Nacionalidade", 100)).When(x => x.Nationality != null);
 
         RuleFor(x => x.Name.LastName)
             .NotEmpty().WithMessage(ValidationHelper.RequiredErrorMessage("Sobrenome"))

@@ -68,7 +68,11 @@ export const signupSchema = z
     }),
     cpf: z
       .string()
-      .nonempty(ValidationMessages.FieldRequired.replace("{field}", "CPF")),
+      .nonempty(ValidationMessages.FieldRequired.replace("{field}", "CPF"))
+      .length(
+        11,
+        ValidationMessages.FieldValueInvalid.replace("{field}", "CPF")
+      ),
     address: z.object({
       street: z
         .string()

@@ -27,11 +27,7 @@ import { useSession } from "~/contexts/session-provider";
 import { useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/_authenticated/_authenticated")({
-  component: Authorize(RouteComponent, [
-    IUserRole.ADMIN,
-    IUserRole.CLIENT,
-    IUserRole.MANAGER,
-  ]),
+  component: Authorize(RouteComponent, [IUserRole.USER]),
 });
 
 function AppSidebar() {

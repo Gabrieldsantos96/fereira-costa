@@ -7,17 +7,14 @@ import { useUpdateUser, useUser } from "~/hooks/tanstack-hooks/use-user";
 export const Route = createFileRoute(
   "/_authenticated/_authenticated/users/edit/$userId"
 )({
-  component: Authorize(RouteComponent, [
-    IUserRole.ADMIN,
-    IUserRole.CLIENT,
-    IUserRole.MANAGER,
-  ]),
+  component: Authorize(RouteComponent, [IUserRole.USER]),
 });
 
 function RouteComponent() {
   const { userId } = Route.useParams();
 
   const { data } = useUser(userId);
+
   const { mutateAsync, isPending } = useUpdateUser();
   return (
     <UserForm

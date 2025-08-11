@@ -13,12 +13,12 @@ export const useNaturalnessOptions = () => {
       const response = await httpClient.get(
         "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?orderBy=nome"
       );
-      return response.data.map((city: any) => ({
-        value: city.nome,
-        label: `${city.nome} - ${city.microrregiao.mesorregiao.UF.sigla}`,
+
+      return response.data.map((city) => ({
+        value: city.microrregiao?.nome,
+        label: city.microrregiao?.nome,
       }));
     },
     staleTime: 1000 * 60 * 60 * 24,
-    retry: 2,
   });
 };

@@ -15,7 +15,6 @@ function RouteComponent() {
   const { applicationUser } = useSession();
 
   useEffect(() => {
-    console.log(applicationUser);
     if (applicationUser) {
       router.navigate({ to: "/" });
     }

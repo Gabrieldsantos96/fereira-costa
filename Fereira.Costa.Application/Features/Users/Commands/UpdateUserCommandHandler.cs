@@ -13,14 +13,7 @@ public sealed class UpdateUserCommandHandler(IUserRepository userRepository) : I
         var existing = await userRepository.GetUserAsync(input.RefId, ct)
                        ?? throw new NotFoundException($"Usuário com Id '{input.RefId}' não encontrado.");
 
-        var userAddress = new Address()
-        {
-            City = input.Command.City,
-            Geolocation = input.Command.Geolocation,
-            Number = input.Command.Number, 
-            Street = input.Command.Street,
-            Zipcode = input.Command.Zipcode
-        };
+        var userAddress = Address.Create(street: input.Command.Street, zipcode: input.Command.Zipcode, city: input.Command.City, geo: input.Command.Geolocation, number: input.Command.Number);
 
         existing.Update(
             input.Command.BirthDay,

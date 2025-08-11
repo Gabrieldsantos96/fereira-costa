@@ -17,6 +17,7 @@ import { Route as AuthSignInRouteImport } from './pages/_auth/sign-in'
 import { Route as AuthForgotPasswordRouteImport } from './pages/_auth/forgot-password'
 import { Route as AuthenticatedAuthenticatedIndexRouteImport } from './pages/_authenticated/_authenticated.index'
 import { Route as AuthenticatedAuthenticatedUsersIndexRouteImport } from './pages/_authenticated/_authenticated.users.index'
+import { Route as AuthenticatedAuthenticatedUsersCreateRouteImport } from './pages/_authenticated/_authenticated.users.create'
 import { Route as AuthenticatedAuthenticatedUsersEditUserIdRouteImport } from './pages/_authenticated/_authenticated.users.edit.$userId'
 
 const EmptyRoute = EmptyRouteImport.update({
@@ -60,6 +61,12 @@ const AuthenticatedAuthenticatedUsersIndexRoute =
     path: '/users/',
     getParentRoute: () => AuthenticatedAuthenticatedRoute,
   } as any)
+const AuthenticatedAuthenticatedUsersCreateRoute =
+  AuthenticatedAuthenticatedUsersCreateRouteImport.update({
+    id: '/users/create',
+    path: '/users/create',
+    getParentRoute: () => AuthenticatedAuthenticatedRoute,
+  } as any)
 const AuthenticatedAuthenticatedUsersEditUserIdRoute =
   AuthenticatedAuthenticatedUsersEditUserIdRouteImport.update({
     id: '/users/edit/$userId',
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/': typeof AuthenticatedAuthenticatedIndexRoute
+  '/users/create': typeof AuthenticatedAuthenticatedUsersCreateRoute
   '/users': typeof AuthenticatedAuthenticatedUsersIndexRoute
   '/users/edit/$userId': typeof AuthenticatedAuthenticatedUsersEditUserIdRoute
 }
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof AuthSignInRoute
   '/sign-up': typeof AuthSignUpRoute
   '/': typeof AuthenticatedAuthenticatedIndexRoute
+  '/users/create': typeof AuthenticatedAuthenticatedUsersCreateRoute
   '/users': typeof AuthenticatedAuthenticatedUsersIndexRoute
   '/users/edit/$userId': typeof AuthenticatedAuthenticatedUsersEditUserIdRoute
 }
@@ -94,6 +103,7 @@ export interface FileRoutesById {
   '/_auth/sign-up': typeof AuthSignUpRoute
   '/_authenticated/_authenticated': typeof AuthenticatedAuthenticatedRouteWithChildren
   '/_authenticated/_authenticated/': typeof AuthenticatedAuthenticatedIndexRoute
+  '/_authenticated/_authenticated/users/create': typeof AuthenticatedAuthenticatedUsersCreateRoute
   '/_authenticated/_authenticated/users/': typeof AuthenticatedAuthenticatedUsersIndexRoute
   '/_authenticated/_authenticated/users/edit/$userId': typeof AuthenticatedAuthenticatedUsersEditUserIdRoute
 }
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/'
+    | '/users/create'
     | '/users'
     | '/users/edit/$userId'
   fileRoutesByTo: FileRoutesByTo
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/'
+    | '/users/create'
     | '/users'
     | '/users/edit/$userId'
   id:
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
     | '/_auth/sign-up'
     | '/_authenticated/_authenticated'
     | '/_authenticated/_authenticated/'
+    | '/_authenticated/_authenticated/users/create'
     | '/_authenticated/_authenticated/users/'
     | '/_authenticated/_authenticated/users/edit/$userId'
   fileRoutesById: FileRoutesById
@@ -196,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAuthenticatedUsersIndexRouteImport
       parentRoute: typeof AuthenticatedAuthenticatedRoute
     }
+    '/_authenticated/_authenticated/users/create': {
+      id: '/_authenticated/_authenticated/users/create'
+      path: '/users/create'
+      fullPath: '/users/create'
+      preLoaderRoute: typeof AuthenticatedAuthenticatedUsersCreateRouteImport
+      parentRoute: typeof AuthenticatedAuthenticatedRoute
+    }
     '/_authenticated/_authenticated/users/edit/$userId': {
       id: '/_authenticated/_authenticated/users/edit/$userId'
       path: '/users/edit/$userId'
@@ -208,6 +228,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAuthenticatedRouteChildren {
   AuthenticatedAuthenticatedIndexRoute: typeof AuthenticatedAuthenticatedIndexRoute
+  AuthenticatedAuthenticatedUsersCreateRoute: typeof AuthenticatedAuthenticatedUsersCreateRoute
   AuthenticatedAuthenticatedUsersIndexRoute: typeof AuthenticatedAuthenticatedUsersIndexRoute
   AuthenticatedAuthenticatedUsersEditUserIdRoute: typeof AuthenticatedAuthenticatedUsersEditUserIdRoute
 }
@@ -215,6 +236,8 @@ interface AuthenticatedAuthenticatedRouteChildren {
 const AuthenticatedAuthenticatedRouteChildren: AuthenticatedAuthenticatedRouteChildren =
   {
     AuthenticatedAuthenticatedIndexRoute: AuthenticatedAuthenticatedIndexRoute,
+    AuthenticatedAuthenticatedUsersCreateRoute:
+      AuthenticatedAuthenticatedUsersCreateRoute,
     AuthenticatedAuthenticatedUsersIndexRoute:
       AuthenticatedAuthenticatedUsersIndexRoute,
     AuthenticatedAuthenticatedUsersEditUserIdRoute:

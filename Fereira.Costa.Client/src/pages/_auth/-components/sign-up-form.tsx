@@ -12,13 +12,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 import { Badge } from "~/components/ui/badge";
@@ -27,11 +20,11 @@ import {
   ChevronRight,
   User,
   MapPin,
-  Settings,
   Mail,
   LockIcon,
   Navigation,
   Loader,
+  CalendarIcon,
 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextInput from "~/components/text-input";
@@ -45,8 +38,20 @@ import { showToast } from "~/utils/trigger-toast";
 import { MessageType } from "~/services/toast-service";
 import { handleError } from "~/utils/handle-error";
 import { MaskedInput } from "~/components/masked-input";
-import { useNaturalnessOptions } from "~/hooks/tanstack-hooks/use-naturalness";
-import { useNationalityOptions } from "~/hooks/tanstack-hooks/use-nationality";
+import {
+  ComboBoxItemType,
+  CustomCombobox,
+} from "~/components/ui/custom-combobox";
+import { SearchResponse } from "~/hooks/tanstack-hooks/use-infinite-scroll";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+import { Calendar } from "~/components/ui/calendar";
+import { formatDateToShort } from "~/utils/date";
+import { searchMunicipalities, searchNationalities } from "~/lib/thirty-api";
 
 const steps = [
   {
@@ -61,6 +66,7 @@ const steps = [
       "password",
       "confirmPassword",
       "cpf",
+      "birthday",
       "nationality",
       "naturalness",
       "phone",
@@ -178,7 +184,6 @@ export function SignUpFormSteps() {
       remeasureHeight();
     }
   }
-
   async function onSubmit(data: SignupFormData) {
     try {
       const {
@@ -188,7 +193,7 @@ export function SignUpFormSteps() {
       const formData = {
         ...partialData,
         ...partialAddress,
-        geo: `LONG-${longitude},LAT-${latitude}`,
+        geolocation: `LONG-${longitude},LAT-${latitude}`,
       };
 
       await mutateAsync(formData);
@@ -373,55 +378,51 @@ type StepProps = {
 };
 
 function FirstStep({ form }: StepProps) {
-  const { data: naturalnessOptions, isLoading: isLoadingNaturalness } =
-    useNaturalnessOptions();
-  const { data: nationalityOptions, isLoading: isLoadingNationality } =
-    useNationalityOptions();
   return (
     <div className="space-y-4">
-      <FormField
-        control={form.control}
-        name="email"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <TextInput
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="E-mail"
-                startIcon={<Mail className="h-4 w-4 text-muted-foreground" />}
-                onChange={field.onChange}
-                value={field.value}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="userName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome de usuário</FormLabel>
-            <FormControl>
-              <TextInput
-                id="userName"
-                name="userName"
-                required
-                placeholder="Nome de usuário"
-                onChange={field.onChange}
-                value={field.value}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <TextInput
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="E-mail"
+                  startIcon={<Mail className="h-4 w-4 text-muted-foreground" />}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="userName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome de usuário</FormLabel>
+              <FormControl>
+                <TextInput
+                  id="userName"
+                  name="userName"
+                  required
+                  placeholder="Nome de usuário"
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="name.firstName"
@@ -464,6 +465,85 @@ function FirstStep({ form }: StepProps) {
         />
         <FormField
           control={form.control}
+          name="birthday"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Data de nascimento</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-max-[320px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        formatDateToShort(field.value)
+                      ) : (
+                        <span>Escolha uma data</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    captionLayout="dropdown"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="naturalness"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Naturalidade:</FormLabel>
+              <FormControl>
+                <CustomCombobox
+                  value={field.value!}
+                  className="w-full"
+                  placeholder="Selecione a naturalidade"
+                  asyncSearchFn={searchMunicipalities}
+                  onSelect={(s) => field.onChange(s)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="nationality"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Nacionalidade:</FormLabel>
+              <FormControl>
+                <CustomCombobox
+                  value={field.value!}
+                  className="w-full"
+                  placeholder="Selecione a nacionalidade"
+                  asyncSearchFn={searchNationalities}
+                  onSelect={(s) => field.onChange(s)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="cpf"
           render={({ field }) => (
             <FormItem>
@@ -497,63 +577,6 @@ function FirstStep({ form }: StepProps) {
                   onChange={field.onChange}
                   value={field.value}
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="naturalness"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Naturalidade</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isLoadingNaturalness}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma cidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {naturalnessOptions?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="nationality"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nacionalidade</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isLoadingNationality}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma nacionalidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {nationalityOptions?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -635,8 +658,6 @@ function SecondStep({ form }: StepProps) {
       }
     }
   };
-
-  console.log(form.getValues());
 
   return (
     <div className="space-y-4">

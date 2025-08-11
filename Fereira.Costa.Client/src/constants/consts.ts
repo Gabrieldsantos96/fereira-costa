@@ -16,6 +16,7 @@ export const Routes = {
     GetPaginatedUsers: "features/users",
     GetUserById: "features/user/{id}",
     UpdateUser: "features/user/{id}",
+    CreateUser: "features/user",
     DeleteUser: "features/user/{id}",
   },
 };

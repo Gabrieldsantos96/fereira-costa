@@ -15,6 +15,7 @@ public static class ApiRoutes
         public const string GetPaginatedUsers = "/features/users";
         public const string GetUserById = "/features/user/{id}";
         public const string UpdateUser = "/features/user/{id}";
+        public const string CreateUser = "/features/user";
         public const string DeleteUser = "/features/user/{id}";
     }
 }

@@ -7,6 +7,7 @@ import { IPaginationResponse } from "~/interfaces/IPagination";
 import { IUserProfileDto } from "~/interfaces/IUserProfileDto";
 import { queryClient } from "~/lib/tanstack-query";
 import { SignupFormData } from "~/validations/sign-up-schema";
+import { UpdateUserFormData } from "~/pages/_authenticated/-components/user-form";
 
 export function useUsers(
   page: number = 1,
@@ -14,7 +15,7 @@ export function useUsers(
   filter: string = ""
 ) {
   return useQuery({
-    queryKey: ["users", page, pageSize],
+    queryKey: ["users", page, pageSize, filter],
     queryFn: async () => {
       const result = await httpClient.get<IPaginationResponse<IUserProfileDto>>(
         `/${Routes.Users.GetPaginatedUsers}?skip=${page}&take=${pageSize}&filter=${filter}`
@@ -41,7 +42,7 @@ export function useUser(id?: string) {
 
 export function useUpdateUser() {
   return useMutation({
-    mutationFn: async (data: SignupFormData) => {
+    mutationFn: async (data: SignupFormData | UpdateUserFormData) => {
       const result = await httpClient.put<IUserProfileDto>(
         `${Routes.Users.UpdateUser.replace("{id}", data.id!)}`,
         data

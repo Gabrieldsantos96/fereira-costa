@@ -11,11 +11,7 @@ import {
 } from "~/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/_authenticated/")({
-  component: Authorize(RouteComponent, [
-    IUserRole.ADMIN,
-    IUserRole.CLIENT,
-    IUserRole.MANAGER,
-  ]),
+  component: Authorize(RouteComponent, [IUserRole.USER]),
 });
 
 const dashboardCards = [
@@ -42,6 +38,7 @@ function RouteComponent() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {dashboardCards.map((card) => (
           <Card
+            key={card.title}
             className="cursor-pointer transition-all hover:shadow-md hover:scale-105"
             onClick={() => router.navigate({ to: card.href })}
           >

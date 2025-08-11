@@ -1,5 +1,4 @@
-﻿using Fereira.Costa.Application.Features.Authentication.Commands;
-using Fereira.Costa.Domain.Entities;
+﻿using Fereira.Costa.Domain.Entities;
 using Fereira.Costa.Domain.ValueObjects;
 using Fereira.Costa.Shared.Models;
 using MediatR;

@@ -66,7 +66,9 @@ public sealed class UserRepository(IDatabaseContextFactory databaseContextFactor
     {
         await using var ctx = await databaseContextFactory.CreateDbContextAsync();
 
-        var existing = await ctx.Users.AsNoTracking().FirstOrDefaultAsync(u => u.RefId == user.RefId, ct);
+        var existing = await ctx.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.RefId == user.RefId, ct);
 
         if (existing is null)
         {
@@ -74,16 +76,7 @@ public sealed class UserRepository(IDatabaseContextFactory databaseContextFactor
         }
         else
         {
-            existing.Update(
-                birthDay: user.BirthDay,
-                naturalness: user.Naturalness,
-                nationality: user.Nationality,
-                email: user.Email,
-                userName: user.UserName,
-                name: user.Name,
-                address: user.Address,
-                phone: user.Phone
-            );
+            ctx.Users.Update(user);
         }
 
         await ctx.SaveChangesAsync(ct);

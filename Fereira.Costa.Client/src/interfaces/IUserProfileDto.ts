@@ -1,13 +1,9 @@
 export const enum IUserRole {
-  MANAGER = "MANAGER",
-  CLIENT = "CLIENT",
-  ADMIN = "ADMIN",
+  USER = "USER",
 }
 
 export const USER_ROLE: Record<string, string> = {
-  MANAGER: "Gerente",
-  CLIENT: "Cliente",
-  ADMIN: "Administrador",
+  USER: "Usuário",
 };
 
 export interface IUserProfileDto {
@@ -18,6 +14,10 @@ export interface IUserProfileDto {
     firstName: string;
     lastName: string;
   };
+  birthDay: string;
+  nationality: string;
+  naturalness: string;
+  cpf: { value: string };
   userName: string;
   phone: string;
   role?: IUserRole;
