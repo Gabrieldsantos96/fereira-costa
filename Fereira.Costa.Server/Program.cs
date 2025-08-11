@@ -76,9 +76,13 @@ else
 }
 
 app.UseSwaggerGen();
+
 app.MapStaticAssets();
+
 app.UseRouting();
+
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.UseFastEndpoints(c =>
