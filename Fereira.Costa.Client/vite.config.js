@@ -8,6 +8,9 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 var BACKEND_URL = "http://Fereira.Costa.server:8080";
 export default defineConfig({
+    build: {
+        outDir: "build",
+    },
     plugins: [
         tanstackRouter({
             target: "react",

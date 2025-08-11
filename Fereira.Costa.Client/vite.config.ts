@@ -11,6 +11,9 @@ import path from "path";
 const BACKEND_URL = "http://Fereira.Costa.server:8080";
 
 export default defineConfig({
+  build: {
+    outDir: "build",
+  },
   plugins: [
     tanstackRouter({
       target: "react",
