@@ -1,10 +1,18 @@
+name: Build and deploy ASP.Net Core app to Azure Web App - fereira-costa-api
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     env:
-      DATABASE_CONNECTION_STRING: ${{ secrets.DATABASE_CONNECTION_STRING }}
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up .NET Core
@@ -28,8 +36,8 @@ jobs:
     needs: build
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
-      WEBSITE_CORS_ALLOWED_ORIGINS: "https://witty-dune-044b72a0f.2.azurestaticapps.net,http://localhost:5173"
       WEBSITE_CORS_SUPPORT_CREDENTIALS: "True"
+      PORT: "8080"
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
