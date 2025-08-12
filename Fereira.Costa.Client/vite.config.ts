@@ -29,13 +29,4 @@ export default defineConfig({
       "~": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    proxy: {
-      "/api": {
-        target:
-          "https://fereira-costa-api-grhde5avgnd6ecck.eastus2-01.azurewebsites.net",
-        changeOrigin: true,
-      },
-    },
-  },
 });
