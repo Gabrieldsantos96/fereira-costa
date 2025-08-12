@@ -39,6 +39,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment: AZURE_CREDENTIALS
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       WEBSITE_CORS_SUPPORT_CREDENTIALS: "True"
@@ -49,17 +50,10 @@ jobs:
         with:
           name: .net-app
 
-      - name: Login to Azure (hardcoded creds)
+      - name: Login to Azure
         uses: azure/login@v2
         with:
-          creds: |
-            {
-              "clientId": "ed718c55-5920-4f6f-9793-05efd9902c09",
-              "clientSecret": "vWH8Q~P3Qlk8OIDo5p4lI-32eHaCmUwqkZv72a84",
-              "subscriptionId": "e64b1119-a8ad-483e-b69d-5f21b6eff265",
-              "tenantId": "8b9a56db-9eee-441c-8b06-320177044fbe"
-            }
-
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
