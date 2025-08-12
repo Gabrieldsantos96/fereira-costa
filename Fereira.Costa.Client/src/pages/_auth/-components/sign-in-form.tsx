@@ -115,14 +115,6 @@ export function SignInForm({ logo = true }: SignInFormProps) {
                 </FormItem>
               )}
             />
-            <div className="flex items-center justify-end text-sm pb-4">
-              <Link
-                to="/forgot-password"
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Esqueceu sua senha?
-              </Link>
-            </div>
 
             <div className="space-y-3">
               <Button

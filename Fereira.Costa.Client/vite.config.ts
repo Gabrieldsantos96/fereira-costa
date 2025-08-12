@@ -8,6 +8,8 @@ import svgr from "vite-plugin-svgr";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
+const BACKEND_URL = "http://Fereira.Costa.server:8080";
+
 export default defineConfig({
   build: {
     outDir: "build",
@@ -29,4 +31,16 @@ export default defineConfig({
       "~": path.resolve(__dirname, "./src"),
     },
   },
+  ...(process.env.NODE_ENV !== "production"
+    ? {
+        server: {
+          proxy: {
+            "/api": {
+              target: BACKEND_URL,
+              changeOrigin: true,
+            },
+          },
+        },
+      }
+    : {}),
 });

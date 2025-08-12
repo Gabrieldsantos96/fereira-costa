@@ -1,7 +1,10 @@
 import axios from "axios";
 
 const API_HTTP_URL =
-  "https://fereira-costa-api-grhde5avgnd6ecck.eastus2-01.azurewebsites.net/api";
+  // @ts-expect-error: Ignorar
+  process.env.NODE_ENV === "production"
+    ? "https://fereira-costa-api-grhde5avgnd6ecck.eastus2-01.azurewebsites.net/api"
+    : "/api";
 
 const httpClient = axios.create({
   baseURL: API_HTTP_URL,
