@@ -16,6 +16,14 @@ public sealed class UserRepository(IDatabaseContextFactory databaseContextFactor
              .FirstOrDefaultAsync(u => u.RefId == refId, ct) ?? throw new NotFoundException(nameof(User));
     }
 
+    public async Task<User?> CheckCpfAsync(string cpf, CancellationToken ct)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+
+        return await ctx.Users.AsNoTracking()
+             .FirstOrDefaultAsync(u => u.Cpf!.Value == cpf, ct) ?? throw new NotFoundException(nameof(User));
+    }
+
     public async Task<User?> GetUserAsync(string email, CancellationToken ct)
     {
         await using var ctx = await databaseContextFactory.CreateDbContextAsync();

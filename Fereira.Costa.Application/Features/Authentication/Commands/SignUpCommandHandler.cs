@@ -1,15 +1,20 @@
 ﻿using Fereira.Costa.Domain.Entities;
 using Fereira.Costa.Domain.Infrastructure.Interfaces.Adapters;
+using Fereira.Costa.Domain.Infrastructure.Interfaces.Repositories;
 using Fereira.Costa.Domain.ValueObjects;
 using Fereira.Costa.Shared.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
 namespace Fereira.Costa.Application.Features.Authentication.Commands;
-public sealed class SignUpCommandHandler(UserManager<User> userManager, IPasswordHelper passwordHelper) : IRequestHandler<SignUpCommand, MutationResult<object>>
+public sealed class SignUpCommandHandler(UserManager<User> userManager,IUserRepository userRepository, IPasswordHelper passwordHelper) : IRequestHandler<SignUpCommand, MutationResult<object>>
 {
     public async Task<MutationResult<object>> Handle(SignUpCommand input, CancellationToken ct)
     {
+        var cpfExists = userRepository.CheckCpfAsync(input.Command.Cpf, ct);
+
+        if (cpfExists != null) throw new ArgumentException(nameof(Cpf));
+
         var newUser = User.Create
             (
             naturalness: input.Command.Naturalness,
@@ -29,6 +34,9 @@ public sealed class SignUpCommandHandler(UserManager<User> userManager, IPasswor
             );
 
         newUser.PasswordHash = passwordHelper.GeneratePassword(newUser, input.Command.Password);
+
+
+
 
         var result = await userManager.CreateAsync(newUser);
 

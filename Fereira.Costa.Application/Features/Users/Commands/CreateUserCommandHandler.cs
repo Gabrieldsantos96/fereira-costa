@@ -11,6 +11,10 @@ public sealed class CreateUserCommandHandler(IUserRepository userRepository)
 {
     public async Task<MutationResult<UserDto>> Handle(CreateUserCommand input, CancellationToken ct)
     {
+        var cpfExists = userRepository.CheckCpfAsync(input.Command.Cpf, ct);
+
+        if (cpfExists != null) throw new ArgumentException(nameof(Cpf));
+
         var user = User.Create(
             input.Command.BirthDay,
             input.Command.Naturalness,
@@ -19,11 +23,11 @@ public sealed class CreateUserCommandHandler(IUserRepository userRepository)
             input.Command.UserName,
             input.Command.Name,
             new Cpf(input.Command.Cpf),
-            input.Command.Phone, 
+            input.Command.Phone,
             input.Command.Street,
-            input.Command.Zipcode, 
+            input.Command.Zipcode,
             input.Command.City,
-            input.Command.Geolocation, 
+            input.Command.Geolocation,
             input.Command.Number
             );
 
