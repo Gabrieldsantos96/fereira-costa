@@ -73,17 +73,3 @@
 - Certifique-se de que o ambiente Docker está corretamente configurado antes de executar o projeto.
 - Para dúvidas ou suporte, entre em contato com o recrutador via e-mail (gabrielk6.mobile@gmail.com) ou WhatsApp ((35) 99196-9303).
 
----
-
-## Instruções para Uso no Git
-
-1. **Salvar o Arquivo**:
-   - Copie o conteúdo acima.
-   - Crie (ou substitua) um arquivo chamado `README.md` na raiz do seu repositório.
-   - Cole o conteúdo no arquivo e salve.
-
-2. **Commit no Git**:
-   ```bash
-   git add README.md
-   git commit -m "Atualiza README com instruções revisadas e organizadas"
-   git push origin main
