@@ -1,4 +1,5 @@
-﻿using Fereira.Costa.Domain.Entities;
+﻿using Fereira.Costa.Application.Mappings;
+using Fereira.Costa.Domain.Entities;
 using Fereira.Costa.Domain.Exceptions;
 using Fereira.Costa.Domain.Infrastructure.Interfaces.Repositories;
 using Fereira.Costa.Domain.ValueObjects;
@@ -6,9 +7,9 @@ using Fereira.Costa.Shared.Models;
 using MediatR;
 
 namespace Fereira.Costa.Application.Features.Users.Commands;
-public sealed class UpdateUserCommandHandler(IUserRepository userRepository) : IRequestHandler<UpdateUserCommand, MutationResult<User>>
+public sealed class UpdateUserCommandHandler(IUserRepository userRepository) : IRequestHandler<UpdateUserCommand, MutationResult<UserDto>>
 {
-    public async Task<MutationResult<User>> Handle(UpdateUserCommand input, CancellationToken ct)
+    public async Task<MutationResult<UserDto>> Handle(UpdateUserCommand input, CancellationToken ct)
     {
         var existing = await userRepository.GetUserAsync(input.RefId, ct)
                        ?? throw new NotFoundException($"Usuário com Id '{input.RefId}' não encontrado.");
@@ -28,6 +29,6 @@ public sealed class UpdateUserCommandHandler(IUserRepository userRepository) : I
         );
         await userRepository.UpsertUserAsync(existing, ct);
 
-        return MutationResult<User>.Ok("Usuário atualizado com sucesso", existing);
+        return MutationResult<UserDto>.Ok("Usuário atualizado com sucesso", existing.ToApplication());
     }
 }

@@ -5,15 +5,14 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Authentication;
 using CommonSignInResult = Fereira.Costa.Application.Features.Authentication.Commands.SignInResult;
 using Fereira.Costa.Domain.Infrastructure.Interfaces.Adapters;
-using Fereira.Costa.Domain.Infrastructure.Interfaces.Repositories;
 using MediatR;
 
 namespace Fereira.Costa.Application.Features.Authentication.Commands;
-public sealed class SignInCommandHandler(IUserRepository userRepository, IAuthenticationService authenticationService, IJwtService jwtService, SignInManager<User> signInManager, IClaimsService claimsService) : IRequestHandler<SignInCommand, MutationResult<CommonSignInResult>>
+public sealed class SignInCommandHandler(IAuthenticationService authService, IAuthenticationService authenticationService, IJwtService jwtService, SignInManager<User> signInManager, IClaimsService claimsService) : IRequestHandler<SignInCommand, MutationResult<CommonSignInResult>>
 {
     public async Task<MutationResult<CommonSignInResult>> Handle(SignInCommand input, CancellationToken ct)
     {
-        var user = await userRepository.GetUserAsync(input.Email, ct, true)
+        var user = await authService.GetUserAsync(input.Email, ct)
          ?? throw new AuthenticationException(ValidationMessages.DefaultAuthenticationError);
 
         var result = await signInManager.CheckPasswordSignInAsync(user, input.Password, false);

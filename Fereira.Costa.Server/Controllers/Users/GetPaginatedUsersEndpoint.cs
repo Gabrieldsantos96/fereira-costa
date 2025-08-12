@@ -1,13 +1,14 @@
-﻿using Fereira.Costa.Domain.Entities;
-using Fereira.Costa.Shared.Consts;
-using Fereira.Costa.Domain.ValueObjects;
-using FastEndpoints;
-using MediatR;
+﻿using FastEndpoints;
 using Fereira.Costa.Application.Features.Users.Queries;
+using Fereira.Costa.Application.Mappings;
+using Fereira.Costa.Domain.Entities;
+using Fereira.Costa.Domain.ValueObjects;
+using Fereira.Costa.Shared.Consts;
+using MediatR;
 
 namespace Fereira.Costa.Server.Controllers.Users;
 
-public sealed class GetPaginatedProductsEndpoint(IMediator mediator) : EndpointWithoutRequest<PaginatedResponse<User>>
+public sealed class GetPaginatedProductsEndpoint(IMediator mediator) : EndpointWithoutRequest<PaginatedResponse<UserDto>>
 {
     public override void Configure()
     {

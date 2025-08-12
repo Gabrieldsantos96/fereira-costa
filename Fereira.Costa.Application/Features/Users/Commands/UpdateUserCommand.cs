@@ -1,4 +1,5 @@
-﻿using Fereira.Costa.Domain.Entities;
+﻿using Fereira.Costa.Application.Mappings;
+using Fereira.Costa.Domain.Entities;
 using Fereira.Costa.Domain.ValueObjects;
 using Fereira.Costa.Shared.Models;
 using MediatR;
@@ -22,7 +23,7 @@ public sealed class UpdateUserDto
     public string Number { get; set; } = null!;
 }
 
-public sealed class UpdateUserCommand : IRequest<MutationResult<User>>
+public sealed class UpdateUserCommand : IRequest<MutationResult<UserDto>>
 {
     public Guid RefId { get; set; }
     public UpdateUserDto Command { get; set; } = null!;

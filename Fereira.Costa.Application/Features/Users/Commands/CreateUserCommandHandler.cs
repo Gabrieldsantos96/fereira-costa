@@ -1,4 +1,5 @@
-﻿using Fereira.Costa.Domain.Entities;
+﻿using Fereira.Costa.Application.Mappings;
+using Fereira.Costa.Domain.Entities;
 using Fereira.Costa.Domain.Infrastructure.Interfaces.Repositories;
 using Fereira.Costa.Domain.ValueObjects;
 using Fereira.Costa.Shared.Models;
@@ -6,9 +7,9 @@ using MediatR;
 
 namespace Fereira.Costa.Application.Features.Users.Commands;
 public sealed class CreateUserCommandHandler(IUserRepository userRepository)
-    : IRequestHandler<CreateUserCommand, MutationResult<User>>
+    : IRequestHandler<CreateUserCommand, MutationResult<UserDto>>
 {
-    public async Task<MutationResult<User>> Handle(CreateUserCommand input, CancellationToken ct)
+    public async Task<MutationResult<UserDto>> Handle(CreateUserCommand input, CancellationToken ct)
     {
         var user = User.Create(
             input.Command.BirthDay,
@@ -28,6 +29,6 @@ public sealed class CreateUserCommandHandler(IUserRepository userRepository)
 
         await userRepository.UpsertUserAsync(user, ct);
 
-        return MutationResult<User>.Ok("Usuário criado com sucesso", user);
+        return MutationResult<UserDto>.Ok("Usuário criado com sucesso", user.ToApplication());
     }
 }

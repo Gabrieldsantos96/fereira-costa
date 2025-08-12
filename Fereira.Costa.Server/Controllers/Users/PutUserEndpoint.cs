@@ -1,12 +1,13 @@
-﻿using Fereira.Costa.Application.Features.Users.Commands;
+﻿using FastEndpoints;
+using Fereira.Costa.Application.Features.Users.Commands;
+using Fereira.Costa.Application.Mappings;
 using Fereira.Costa.Domain.Entities;
 using Fereira.Costa.Shared.Consts;
 using Fereira.Costa.Shared.Models;
-using FastEndpoints;
 using MediatR;
 
 namespace Fereira.Costa.Server.Controllers.Users;
-public sealed class UpdateUserEndpoint(IMediator mediator) : Endpoint<UpdateUserDto, MutationResult<User>>
+public sealed class UpdateUserEndpoint(IMediator mediator) : Endpoint<UpdateUserDto, MutationResult<UserDto>>
 {
     public override void Configure()
     {

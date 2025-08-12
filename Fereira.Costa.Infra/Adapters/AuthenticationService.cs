@@ -6,6 +6,14 @@ using Microsoft.EntityFrameworkCore;
 namespace Fereira.Costa.Infra.Adapters;
 public sealed class AuthenticationService(IDatabaseContextFactory databaseContextFactory) : IAuthenticationService
 {
+    public async Task<User?> GetUserAsync(string email, CancellationToken ct)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+
+        return await ctx.Users.AsNoTracking()
+             .FirstOrDefaultAsync(u => u.Email == email, ct) ?? throw new NotFoundException(nameof(User));
+    }
+
     public async Task CreateRefreshTokenAsync(RefreshToken refreshToken, CancellationToken ct)
     {
         await using var ctx = await databaseContextFactory.CreateDbContextAsync();
