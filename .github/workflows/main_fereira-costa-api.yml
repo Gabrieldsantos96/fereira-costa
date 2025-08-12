@@ -49,9 +49,16 @@ jobs:
         with:
           name: .net-app
 
-      - uses: azure/login@v2
+      - name: Login to Azure (hardcoded creds)
+        uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: |
+            {
+              "clientId": "ed718c55-5920-4f6f-9793-05efd9902c09",
+              "clientSecret": "vWH8Q~P3Qlk8OIDo5p4lI-32eHaCmUwqkZv72a84",
+              "subscriptionId": "e64b1119-a8ad-483e-b69d-5f21b6eff265",
+              "tenantId": "8b9a56db-9eee-441c-8b06-320177044fbe"
+            }
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
