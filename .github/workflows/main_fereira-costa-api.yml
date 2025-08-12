@@ -49,16 +49,19 @@ jobs:
         with:
           name: .net-app
 
-      - name: Login to Azure (hardcoded creds)
+      - name: Debug - check AZURE_CREDENTIALS presence
+        run: |
+          if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+            echo "❌ AZURE_CREDENTIALS secret is empty or not set!"
+            exit 1
+          else
+            echo "✅ AZURE_CREDENTIALS secret is set and has length: $(echo -n '${{ secrets.AZURE_CREDENTIALS }}' | wc -c)"
+          fi
+
+      - name: Login to Azure (using AZURE_CREDENTIALS secret)
         uses: azure/login@v2
         with:
-          creds: |
-            {
-              "clientId": "ed718c55-5920-4f6f-9793-05efd9902c09",
-              "clientSecret": "vWH8Q~P3Qlk8OIDo5p4lI-32eHaCmUwqkZv72a84",
-              "subscriptionId": "e64b1119-a8ad-483e-b69d-5f21b6eff265",
-              "tenantId": "8b9a56db-9eee-441c-8b06-320177044fbe"
-            }
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
