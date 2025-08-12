@@ -11,7 +11,7 @@ public sealed class CreateUserCommandHandler(IUserRepository userRepository)
 {
     public async Task<MutationResult<UserDto>> Handle(CreateUserCommand input, CancellationToken ct)
     {
-        var cpfExists = userRepository.CheckCpfAsync(input.Command.Cpf, ct);
+        var cpfExists = await userRepository.CheckCpfAsync(input.Command.Cpf, ct);
 
         if (cpfExists != null) throw new ArgumentException(nameof(Cpf));
 
