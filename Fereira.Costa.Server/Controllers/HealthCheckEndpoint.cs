@@ -9,6 +9,7 @@ public class HealthCheckEndpoint : EndpointWithoutRequest
         AllowAnonymous();
     }
 
+
     public override async Task HandleAsync(CancellationToken ct)
     {
         await SendAsync(new { Status = "API is running" }, cancellation: ct);
