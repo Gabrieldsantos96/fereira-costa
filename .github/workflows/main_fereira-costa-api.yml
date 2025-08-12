@@ -39,6 +39,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment: AZURE_CREDENTIALS
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       WEBSITE_CORS_SUPPORT_CREDENTIALS: "True"
@@ -49,20 +50,10 @@ jobs:
         with:
           name: .net-app
 
-      - name: Debug - check AZURE_CREDENTIALS presence
-        run: |
-          if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
-            echo "❌ AZURE_CREDENTIALS secret is empty or not set!"
-            exit 1
-          else
-            echo "✅ AZURE_CREDENTIALS secret is set and has length: $(echo -n '${{ secrets.AZURE_CREDENTIALS }}' | wc -c)"
-          fi
-
-      - name: Login to Azure (using AZURE_CREDENTIALS secret)
+      - name: Login to Azure
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
