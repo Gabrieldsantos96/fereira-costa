@@ -50,7 +50,9 @@ public sealed class UserRepository(IDatabaseContextFactory databaseContextFactor
     public async Task DeleteUserAsync(Guid userRefId)
     {
         await using var ctx = await databaseContextFactory.CreateDbContextAsync();
-        var user = await ctx.Users.FirstOrDefaultAsync(u => u.RefId == userRefId);
+        var user = await ctx.Users
+       .AsTracking()
+       .FirstOrDefaultAsync(u => u.RefId == userRefId);
 
         if (user is null)
             throw new NotFoundException(nameof(User));

@@ -1,6 +1,7 @@
 
 using Fereira.Costa.Domain.Entities;
 using Fereira.Costa.Domain.Infrastructure.Interfaces.Adapters;
+using Fereira.Costa.Domain.ValueObjects;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -20,10 +21,14 @@ public class DatabaseContext(
         #region DbConfig
         modelBuilder.UseCollation("SQL_Latin1_General_CP1_CI_AI");
 
-        foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        modelBuilder.Entity<User>().OwnsOne(u => u.Address, a =>
         {
-            relationship.DeleteBehavior = DeleteBehavior.Restrict;
-        }
+            a.Property(p => p.Street).HasMaxLength(1000);
+            a.Property(p => p.Zipcode).HasMaxLength(20);
+            a.Property(p => p.Number).HasMaxLength(20);
+            a.Property(p => p.City).HasMaxLength(100);
+            a.Property(p => p.Geolocation).HasMaxLength(50);
+        });
         #endregion
     }
     public override async Task<int> SaveChangesAsync(

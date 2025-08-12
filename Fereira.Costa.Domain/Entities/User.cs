@@ -18,7 +18,7 @@ public class User : IdentityUser<int>
     public Guid RefId { get; set; }
     public Name Name { get; set; }
     public Cpf? Cpf { get; set; }
-    public Address Address { get; set; }
+    public Address? Address { get; set; }
     public string Phone { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

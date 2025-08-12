@@ -47,6 +47,7 @@ import { cn } from "~/lib/utils";
 import { Calendar } from "~/components/ui/calendar";
 import { formatDateToShort } from "~/utils/date";
 import { searchMunicipalities, searchNationalities } from "~/lib/thirty-api";
+import { useRouter } from "@tanstack/react-router";
 
 const steps = [
   {
@@ -87,6 +88,7 @@ async function signUpRequest(data: unknown) {
 }
 
 export function SignUpFormSteps() {
+  const router = useRouter();
   const { isPending, mutateAsync } = useMutation({ mutationFn: signUpRequest });
   const [currentStep, setCurrentStep] = useState(1);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -197,6 +199,7 @@ export function SignUpFormSteps() {
         type: MessageType.Success,
         text: "Conta criada com sucesso",
       });
+      router.navigate({ to: "/sign-in" });
     } catch (error) {
       showToast({
         type: MessageType.Danger,
