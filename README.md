@@ -5,7 +5,7 @@
 > **Observação**: Recomenda-se o uso do **Visual Studio Community** para executar o projeto.
 
 ### 1. Variáveis de Ambiente
-- As variáveis de ambiente são carregadas automaticamente a partir das **GitHub Actions** para o ambiente de desenvolvimento.
+- As variáveis de ambiente são carregadas automaticamente a partir das **GitHub Actions** para ambiente prod.
 - O arquivo de configuração já está devidamente preparado para uso local.
 
 ### 2. Configuração do Ambiente Local
