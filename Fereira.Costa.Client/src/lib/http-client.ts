@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_HTTP_URL = `/api`;
+const API_HTTP_URL = import.meta.env.VITE_API_URL;
 
 const httpClient = axios.create({
   baseURL: API_HTTP_URL,

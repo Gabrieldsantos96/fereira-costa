@@ -1,10 +1,12 @@
+using FastEndpoints;
+using FastEndpoints.Swagger;
 using Fereira.Costa.Application;
 using Fereira.Costa.Infra;
 using Fereira.Costa.Infra.Adapters;
 using Fereira.Costa.Server;
-using FastEndpoints;
-using FastEndpoints.Swagger;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,6 +58,33 @@ else
 }
 
 var app = builder.Build();
+
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var errorFeature = context.Features.Get<IExceptionHandlerFeature>();
+        if (errorFeature != null)
+        {
+            var exception = errorFeature.Error;
+
+            var problemDetails = new
+            {
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                Title = "An error occurred while processing your request.",
+                Status = (int)HttpStatusCode.InternalServerError,
+                Detail = exception.Message,
+                TraceId = context.TraceIdentifier,
+                exception.StackTrace
+            };
+
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.ContentType = "application/problem+json";
+
+            await context.Response.WriteAsJsonAsync(problemDetails);
+        }
+    });
+});
 
 using (var scope = app.Services.CreateScope())
 {
