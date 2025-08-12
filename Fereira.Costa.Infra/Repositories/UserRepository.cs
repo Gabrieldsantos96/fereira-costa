@@ -21,7 +21,7 @@ public sealed class UserRepository(IDatabaseContextFactory databaseContextFactor
         await using var ctx = await databaseContextFactory.CreateDbContextAsync();
 
         return await ctx.Users.AsNoTracking()
-             .FirstOrDefaultAsync(u => u.Cpf!.Value == cpf, ct) ?? throw new NotFoundException(nameof(User));
+             .FirstOrDefaultAsync(u => u.Cpf!.Value == cpf, ct);
     }
 
     public async Task<User?> GetUserAsync(string email, CancellationToken ct)
