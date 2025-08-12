@@ -23,8 +23,8 @@ jobs:
         run: rm -rf ${{env.DOTNET_ROOT}}/myapp
       - name: Build with dotnet
         run: dotnet build ./Fereira.Costa.Server/Fereira.Costa.Server.csproj --configuration Release
-      - name: dotnet publish
-        run: dotnet publish ./Fereira.Costa.Server/Fereira.Costa.Server.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      - name: dotnet publish self-contained
+        run: dotnet publish ./Fereira.Costa.Server/Fereira.Costa.Server.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp --self-contained true --runtime linux-x64
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -37,7 +37,6 @@ jobs:
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       WEBSITE_CORS_SUPPORT_CREDENTIALS: "True"
-      PORT: "8080"
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -48,6 +47,8 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: "fereira-costa-api"
-          slot-name: "Production"
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_122941FB832F4B8AAEE8B78BBF77CDF8 }}
+      - name: Set Startup Command
+        run: |
+          az webapp config set --name "fereira-costa-api" --resource-group "fereira-costa" --startup-file "dotnet Fereira.Costa.Server.dll"
