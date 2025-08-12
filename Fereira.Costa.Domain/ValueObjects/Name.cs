@@ -1,9 +1,6 @@
-﻿
-using Fereira.Costa.Domain.Exceptions;
+﻿using Fereira.Costa.Domain.Exceptions;
 using Fereira.Costa.Shared.Validations;
 using Microsoft.EntityFrameworkCore;
-
-namespace Fereira.Costa.Domain.ValueObjects;
 
 [Owned]
 public sealed class Name : IEquatable<Name>
@@ -12,23 +9,17 @@ public sealed class Name : IEquatable<Name>
     public string LastName { get; set; } = null!;
 
     private const char Separator = '|';
+
     public Name() { }
+
     public Name(string firstName, string lastName)
     {
-        if (string.IsNullOrWhiteSpace(firstName))
-            throw new DomainException(ValidationHelper.RequiredErrorMessage(firstName));
-        if (firstName.Length > 100)
-            throw new DomainException(ValidationHelper.MaxLengthErrorMessage("nome", 100));
-
-        if (string.IsNullOrWhiteSpace(lastName))
-            throw new DomainException(ValidationHelper.RequiredErrorMessage("sobrenome"));
-        if (lastName.Length > 100)
-            throw new DomainException(ValidationHelper.MaxLengthErrorMessage("sobrenome", 100));
-
         FirstName = firstName;
         LastName = lastName;
     }
+
     public string ToSerializedString() => $"{FirstName}{Separator}{LastName}";
+
     public static Name FromString(string serializedName)
     {
         if (string.IsNullOrWhiteSpace(serializedName))

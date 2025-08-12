@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FluentAssertions;
 using FluentValidation;
 using Xunit;
@@ -11,7 +12,7 @@ namespace Fereira.Costa.Tests.UserTests
     public class UserTests
     {
         private static readonly Name ValidName = new("Test", "User");
-        private static readonly Cpf ValidCpf = new("12345678901"); // Assumindo formato string só números
+        private static readonly Cpf ValidCpf = new("11144477735");
         private static readonly string ValidStreet = "Test St";
         private static readonly string ValidZipcode = "12345-678";
         private static readonly string ValidCity = "Test City";
@@ -67,10 +68,11 @@ namespace Fereira.Costa.Tests.UserTests
         }
 
         [Theory]
-        [InlineData("", "validuser01", "test", "Brasileiro", "Brasil", "12345678901", "1234567890", "Email")] // Email vazio
-        [InlineData("invalid-email", "validuser01", "test", "Brasileiro", "Brasil", "12345678901", "1234567890", "Email")] // Email inválido
-        [InlineData("validuser@example.com", "", "test", "Brasileiro", "Brasil", "12345678901", "1234567890", "Nome de usuário")] // Username vazio
-        [InlineData("validuser@example.com", "validuser01", "", "Brasileiro", "Brasil", "12345678901", "1234567890", "Primeiro nome")] // Nome vazio
+        [InlineData("", "validuser01", "test", "Brasileiro", "Brasil", "11144477735", "1234567890", "Email")]
+        [InlineData("invalid-email", "validuser01", "test", "Brasileiro", "Brasil", "11144477735", "1234567890", "Email")]
+        [InlineData("validuser@example.com", "", "test", "Brasileiro", "Brasil", "11144477735", "1234567890", "Nome de usuário")]
+        [InlineData("validuser@example.com", "validuser01", "", "Brasileiro", "Brasil", "11144477735", "1234567890", "Primeiro nome")]
+        [InlineData("validuser@example.com", "validuser01", "test", "Brasileiro", "Brasil", "00000000000", "1234567890", "CPF")]
         public void Create_ShouldThrowValidationException_WhenInvalidParameters(
             string email,
             string userName,
@@ -82,7 +84,6 @@ namespace Fereira.Costa.Tests.UserTests
             string expectedError)
         {
             var name = new Name(firstName, "User");
-            var cpf = new Cpf(cpfNumber);
 
             Action act = () => User.Create(
                 birthDay: DateTime.UtcNow.AddYears(-20),
@@ -91,7 +92,7 @@ namespace Fereira.Costa.Tests.UserTests
                 email,
                 userName,
                 name,
-                cpf,
+                new Cpf(cpfNumber),
                 phone,
                 ValidStreet,
                 ValidZipcode,
@@ -99,14 +100,22 @@ namespace Fereira.Costa.Tests.UserTests
                 ValidGeo,
                 ValidNumber);
 
-            act.Should().Throw<ValidationException>()
-               .Where(e => e.Errors.Any(err => err.ErrorMessage.Contains(expectedError)));
+            if (expectedError.Equals("CPF", StringComparison.OrdinalIgnoreCase))
+            {
+                act.Should().Throw<ArgumentException>()
+                    .Where(e => e.Message.Contains("CPF inválido", StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                act.Should().Throw<ValidationException>()
+                    .Where(e => e.Errors.Any(err =>
+                        err.ErrorMessage.Contains(expectedError, StringComparison.OrdinalIgnoreCase)));
+            }
         }
 
         [Fact]
         public void Update_ShouldModifyFields_WhenValidParameters()
         {
-            // Arrange
             var user = User.Create(
                 birthDay: new DateTime(1990, 1, 1),
                 naturalness: "Brasileiro",
@@ -128,11 +137,10 @@ namespace Fereira.Costa.Tests.UserTests
             var newEmail = "newemail@example.com";
             var newUserName = "newusername";
             var newName = new Name("NewFirst", "NewLast");
-            var newCpf = new Cpf("10987654321");
+            var newCpf = new Cpf("52998224725");
             var newPhone = "0987654321";
             var newAddress = Address.Create("New St", "98765-432", "New City", "23.0000,-46.0000", "123");
 
-            // Act
             user.Update(
                 birthDay: newBirthDay,
                 naturalness: newNaturalness,
@@ -144,7 +152,6 @@ namespace Fereira.Costa.Tests.UserTests
                 phone: newPhone,
                 address: newAddress);
 
-            // Assert
             user.BirthDay.Should().Be(newBirthDay);
             user.Naturalness.Should().Be(newNaturalness);
             user.Nationality.Should().Be(newNationality);
@@ -160,7 +167,6 @@ namespace Fereira.Costa.Tests.UserTests
         [Fact]
         public void Update_ShouldModifyOnlyProvidedFields()
         {
-            // Arrange
             var user = User.Create(
                 birthDay: new DateTime(1990, 1, 1),
                 naturalness: "Brasileiro",
@@ -179,14 +185,10 @@ namespace Fereira.Costa.Tests.UserTests
             var newEmail = "updatedemail@example.com";
             var newPhone = "9999999999";
 
-            // Act
             user.Update(email: newEmail, phone: newPhone);
 
-            // Assert
             user.Email.Should().Be(newEmail);
             user.Phone.Should().Be(newPhone);
-
-            // Campos não atualizados permanecem iguais
             user.UserName.Should().Be("username");
             user.Name.Should().Be(ValidName);
             user.BirthDay.Should().Be(new DateTime(1990, 1, 1));
@@ -199,7 +201,6 @@ namespace Fereira.Costa.Tests.UserTests
         [Fact]
         public void Update_ShouldThrowDomainException_WhenNullProvidedForNonNullable()
         {
-            // Arrange
             var user = User.Create(
                 birthDay: new DateTime(1990, 1, 1),
                 naturalness: "Brasileiro",
@@ -215,17 +216,12 @@ namespace Fereira.Costa.Tests.UserTests
                 geo: ValidGeo,
                 number: ValidNumber);
 
-            // Act & Assert
             Action act = () => user.Update(email: null);
-
-            // email: null = não atualiza, logo não lança
             act.Should().NotThrow();
 
-            // Porém se passar explicitamente vazio, será validado na validação (e lançará)
             Action actEmpty = () => user.Update(email: "");
-
             actEmpty.Should().Throw<ValidationException>()
-                .Where(e => e.Errors.Any(err => err.ErrorMessage.Contains("Email")));
+                .Where(e => e.Errors.Any(err => err.ErrorMessage.Contains("Email", StringComparison.OrdinalIgnoreCase)));
         }
     }
 }

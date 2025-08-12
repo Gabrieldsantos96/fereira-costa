@@ -12,16 +12,12 @@ public record Cpf
     public Cpf(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-        {
             throw new ArgumentException("O valor do CPF não pode ser nulo ou vazio.");
-        }
 
         value = RemoveMask(value);
 
         if (!IsValid(value))
-        {
             throw new ArgumentException($"CPF inválido. CPF: {value}");
-        }
 
         Value = value;
     }
@@ -31,22 +27,18 @@ public record Cpf
         return valor.Replace(".", "").Replace("-", "");
     }
 
-    public override string ToString()
-    {
-        return Value;
-    }
+    public override string ToString() => Value;
 
-    private bool IsValid(string cpf)
+    private static bool IsValid(string cpf)
     {
         if (cpf.Length != 11)
             return false;
 
-        for (int j = 0; j < 10; j++)
-            if (j.ToString().PadLeft(11, char.Parse(j.ToString())) == cpf)
-                return false;
+        if (cpf.All(c => c == cpf[0]))
+            return false;
 
-        int[] multiplicadores1 = [10, 9, 8, 7, 6, 5, 4, 3, 2];
-        int[] multiplicadores2 = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+        int[] multiplicadores1 = new int[] { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+        int[] multiplicadores2 = new int[] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
 
         string tempCpf = cpf.Substring(0, 9);
         int soma = 0;
