@@ -13,11 +13,14 @@ public class UserDto(
     Cpf cpf,
     Address address,
     string phone,
+    string userName,
     DateTime createdAt,
     DateTime updatedAt)
 {
     public Guid RefId { get; set; } = refId;
     public Name Name { get; set; } = name;
+
+    public string UserName { get; set; } = userName;
     public string Email { get; set; } = email;
     public DateTime BirthDay { get; set; } = birthDay;
     public string Naturalness { get; set; } = naturalness;
@@ -43,6 +46,7 @@ public static class UserMapping
             cpf: user.Cpf!,
             address: user.Address,
             phone: user.Phone,
+            userName: user.UserName ?? string.Empty,
             createdAt: user.CreatedAt,
             updatedAt: user.UpdatedAt
         );

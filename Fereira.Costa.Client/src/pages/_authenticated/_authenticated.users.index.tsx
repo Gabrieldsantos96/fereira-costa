@@ -64,9 +64,9 @@ function RouteComponent() {
 
   const filteredUsers = users.filter(
     (user: IUserProfileDto) =>
-      user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.name.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.name.firstName.toLowerCase().includes(searchTerm.toLowerCase())
+      user?.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user?.name?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user?.name?.firstName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleDelete = async (id: string) => {
