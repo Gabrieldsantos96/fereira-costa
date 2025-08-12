@@ -5,6 +5,8 @@ import { UserForm } from "./-components/user-form";
 import { useMutation } from "@tanstack/react-query";
 import httpClient from "~/lib/http-client";
 import { Routes } from "~/constants/consts";
+import { useEffect } from "react";
+import { queryClient } from "~/lib/tanstack-query";
 
 export const Route = createFileRoute(
   "/_authenticated/_authenticated/users/create"
@@ -20,5 +22,6 @@ function RouteComponent() {
   const { isPending, mutateAsync } = useMutation({
     mutationFn: createUserRequest,
   });
+
   return <UserForm isPending={isPending} onSubmitFn={mutateAsync} />;
 }

@@ -33,6 +33,7 @@ import {
 } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 import { formatDateToShort } from "~/utils/date";
+import { queryClient } from "~/lib/tanstack-query";
 
 interface UpdateUserFormProps {
   userId?: string;
@@ -127,6 +128,8 @@ export function UserForm({
       };
 
       await onSubmitFn(formData);
+
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       showToast({
         text: "Usuário salvo com sucesso",
         type: MessageType.Success,
