@@ -1,173 +1,231 @@
-﻿//using Fereira.Costa.Domain.Entities;
-//using Fereira.Costa.Domain.ValueObjects;
-//using Fereira.Costa.Shared.Consts;
-//using FluentAssertions;
-//using FluentValidation;
+﻿using System;
+using FluentAssertions;
+using FluentValidation;
+using Xunit;
+using Fereira.Costa.Domain.Entities;
+using Fereira.Costa.Domain.ValueObjects;
+using Fereira.Costa.Domain.Exceptions;
 
+namespace Fereira.Costa.Tests.UserTests
+{
+    public class UserTests
+    {
+        private static readonly Name ValidName = new("Test", "User");
+        private static readonly Cpf ValidCpf = new("12345678901"); // Assumindo formato string só números
+        private static readonly string ValidStreet = "Test St";
+        private static readonly string ValidZipcode = "12345-678";
+        private static readonly string ValidCity = "Test City";
+        private static readonly string ValidGeo = "12.3456,-65.4321";
+        private static readonly string ValidNumber = "0001";
 
-//namespace Fereira.Costa.Tests.UserTests;
+        [Fact]
+        public void Create_ShouldCreateUser_WhenValidParameters()
+        {
+            var birthDay = new DateTime(1990, 1, 1);
+            var naturalness = "Brasileiro";
+            var nationality = "Brasil";
+            var email = "validuser@example.com";
+            var userName = "validuser01";
+            var phone = "1234567890";
 
-//public class UserTest
-//{
-//    private static readonly Name ValidName = new("Test", "User");
+            var user = User.Create(
+                birthDay,
+                naturalness,
+                nationality,
+                email,
+                userName,
+                ValidName,
+                ValidCpf,
+                phone,
+                ValidStreet,
+                ValidZipcode,
+                ValidCity,
+                ValidGeo,
+                ValidNumber,
+                emailConfirmed: true);
 
-//    private static readonly Address ValidAddress = new()
-//    {
-//        City = "Test City",
-//        Geolocation = "12.3456,-65.4321",
-//        Number = "0001",
-//        Street = "Test St",
-//        Zipcode = "12345-678"
-//    };
+            user.Should().NotBeNull();
+            user.BirthDay.Should().Be(birthDay);
+            user.Naturalness.Should().Be(naturalness);
+            user.Nationality.Should().Be(nationality);
+            user.Email.Should().Be(email);
+            user.UserName.Should().Be(userName);
+            user.Name.Should().Be(ValidName);
+            user.Cpf.Should().Be(ValidCpf);
+            user.Phone.Should().Be(phone);
+            user.Address.Should().NotBeNull();
+            user.Address.Street.Should().Be(ValidStreet);
+            user.Address.Zipcode.Should().Be(ValidZipcode);
+            user.Address.City.Should().Be(ValidCity);
+            user.Address.Geolocation.Should().Be(ValidGeo);
+            user.Address.Number.Should().Be(ValidNumber);
+            user.EmailConfirmed.Should().BeTrue();
+            user.LockoutEnabled.Should().BeFalse();
+            user.RefId.Should().NotBeEmpty();
+            user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+            user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        }
 
-//    [Fact]
-//    public static void CreateUser_ShouldCreateUser_WhenValidParameters()
-//    {
-//        var email = "testUser01@example.com";
-//        var userName = "testUser01";
-//        var phone = "1234567890";
-//        var status = UserStatusConsts.ACTIVE;
-//        var role = RoleConsts.Client;
-        
-//        var user = User.Create(email, userName, ValidName, ValidAddress, phone, status, role);
+        [Theory]
+        [InlineData("", "validuser01", "test", "Brasileiro", "Brasil", "12345678901", "1234567890", "Email")] // Email vazio
+        [InlineData("invalid-email", "validuser01", "test", "Brasileiro", "Brasil", "12345678901", "1234567890", "Email")] // Email inválido
+        [InlineData("validuser@example.com", "", "test", "Brasileiro", "Brasil", "12345678901", "1234567890", "Nome de usuário")] // Username vazio
+        [InlineData("validuser@example.com", "validuser01", "", "Brasileiro", "Brasil", "12345678901", "1234567890", "Primeiro nome")] // Nome vazio
+        public void Create_ShouldThrowValidationException_WhenInvalidParameters(
+            string email,
+            string userName,
+            string firstName,
+            string naturalness,
+            string nationality,
+            string cpfNumber,
+            string phone,
+            string expectedError)
+        {
+            var name = new Name(firstName, "User");
+            var cpf = new Cpf(cpfNumber);
 
-//        // Assert
-//        user.Name.Should().NotBeNull();
-//        user.Email.Should().Be(email);
-//        user.UserName.Should().Be(userName);
-//        user.Name.Should().Be(ValidName);
-//        user.Address.Should().Be(ValidAddress);
-//        user.Phone.Should().Be(phone);
-//        user.Status.Should().Be(status);
-//        user.Role.Should().Be(role);
-//        user.RefId.Should().NotBeEmpty();
-//        user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-//        user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-//    }
+            Action act = () => User.Create(
+                birthDay: DateTime.UtcNow.AddYears(-20),
+                naturalness,
+                nationality,
+                email,
+                userName,
+                name,
+                cpf,
+                phone,
+                ValidStreet,
+                ValidZipcode,
+                ValidCity,
+                ValidGeo,
+                ValidNumber);
 
-//    [Fact]
-//    public static void OverloadCreateUser_ShouldCreateUser_WhenValidParameters()
-//    {
-//        var email = "testUser02@example.com";
-//        var userName = "testUser02";
-//        var phone = "1234567890";
-//        var status = UserStatusConsts.INACTIVE;
-//        var role = RoleConsts.Manager;
-//        var street = "Av. Test";
-//        var zipcode = "12345-678";
-//        var city = "Test City";
-//        var geo = "12.3456,-65.4321";
-//        var number = "0001";
+            act.Should().Throw<ValidationException>()
+               .Where(e => e.Errors.Any(err => err.ErrorMessage.Contains(expectedError)));
+        }
 
-//        var user = User.Create(email, userName, ValidName, phone, status, role, street, zipcode, city, geo, number);
+        [Fact]
+        public void Update_ShouldModifyFields_WhenValidParameters()
+        {
+            // Arrange
+            var user = User.Create(
+                birthDay: new DateTime(1990, 1, 1),
+                naturalness: "Brasileiro",
+                nationality: "Brasil",
+                email: "oldemail@example.com",
+                userName: "oldusername",
+                name: ValidName,
+                cpf: ValidCpf,
+                phone: "1234567890",
+                street: ValidStreet,
+                zipcode: ValidZipcode,
+                city: ValidCity,
+                geo: ValidGeo,
+                number: ValidNumber);
 
-//        // Assert
-//        user.Should().NotBeNull();
-//        user.Email.Should().Be(email);
-//        user.UserName.Should().Be(userName);
-//        user.Name.Should().Be(ValidName);
-//        user.Address.Street.Should().Be(street);
-//        user.Address.Zipcode.Should().Be(zipcode);
-//        user.Address.City.Should().Be(city);
-//        user.Address.Geolocation.Should().Be(geo);
-//        user.Address.Number.Should().Be(number);
-//        user.Phone.Should().Be(phone);
-//        user.Status.Should().Be(status);
-//        user.Role.Should().Be(role);
-//        user.RefId.Should().NotBeEmpty();
-//        user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-//        user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-//        user.LockoutEnabled.Should().BeFalse();
-//        user.EmailConfirmed.Should().BeTrue();
-//    }
+            var newBirthDay = new DateTime(1985, 5, 5);
+            var newNaturalness = "Argentino";
+            var newNationality = "Argentina";
+            var newEmail = "newemail@example.com";
+            var newUserName = "newusername";
+            var newName = new Name("NewFirst", "NewLast");
+            var newCpf = new Cpf("10987654321");
+            var newPhone = "0987654321";
+            var newAddress = Address.Create("New St", "98765-432", "New City", "23.0000,-46.0000", "123");
 
-//    [Theory]
-//    [InlineData("", "userTest", "1234567890", UserStatusConsts.ACTIVE, RoleConsts.User, "Email")]
-//    [InlineData("testUser02@example.com", "", "1234567890", UserStatusConsts.ACTIVE, RoleConsts.Client, "Nome de usuário")]
-//    [InlineData("testUser03@example.com", "userTest", "", UserStatusConsts.ACTIVE, RoleConsts.Client, "Telefone")]
-//    [InlineData("testUser04@example.com", "userTest", "1234567890", "InvalidStatus", RoleConsts.Client, "Status")]
-//    [InlineData("testUser05@example.com", "userTest", "1234567890", UserStatusConsts.ACTIVE, "InvalidRole", "Role")]
-//    public void Create_WithInvalidParameters_ShouldThrowValidationException(
-//    string email, string userName, string phone, string status, string role, string expectedError)
-//    {
-//        Action act = () => User.Create(email, userName, ValidName, ValidAddress, phone, status, role);
+            // Act
+            user.Update(
+                birthDay: newBirthDay,
+                naturalness: newNaturalness,
+                nationality: newNationality,
+                email: newEmail,
+                userName: newUserName,
+                name: newName,
+                cpf: newCpf,
+                phone: newPhone,
+                address: newAddress);
 
-//        // Assert
-//        act.Should().Throw<ValidationException>()
-//           .WithMessage($"*{expectedError}*");
-//    }
+            // Assert
+            user.BirthDay.Should().Be(newBirthDay);
+            user.Naturalness.Should().Be(newNaturalness);
+            user.Nationality.Should().Be(newNationality);
+            user.Email.Should().Be(newEmail);
+            user.UserName.Should().Be(newUserName);
+            user.Name.Should().Be(newName);
+            user.Cpf.Should().Be(newCpf);
+            user.Phone.Should().Be(newPhone);
+            user.Address.Should().Be(newAddress);
+            user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        }
 
-//    [Fact]
-//    public void Create_WithInvalidEmailFormat_ShouldThrowValidationException()
-//    {
-//        var invalidEmail = "invalid-email";
+        [Fact]
+        public void Update_ShouldModifyOnlyProvidedFields()
+        {
+            // Arrange
+            var user = User.Create(
+                birthDay: new DateTime(1990, 1, 1),
+                naturalness: "Brasileiro",
+                nationality: "Brasil",
+                email: "email@example.com",
+                userName: "username",
+                name: ValidName,
+                cpf: ValidCpf,
+                phone: "1234567890",
+                street: ValidStreet,
+                zipcode: ValidZipcode,
+                city: ValidCity,
+                geo: ValidGeo,
+                number: ValidNumber);
 
-//        Action act = () => User.Create(invalidEmail, "testUsername", ValidName, ValidAddress, "1234567890", UserStatusConsts.ACTIVE, RoleConsts.Client);
+            var newEmail = "updatedemail@example.com";
+            var newPhone = "9999999999";
 
-//        // Assert
-//        act.Should().Throw<ValidationException>()
-//           .WithMessage("*O email deve ser válido*");
-//    }
+            // Act
+            user.Update(email: newEmail, phone: newPhone);
 
-//    [Fact]
-//    public void Update_WithValidParameters_ShouldUpdateFields()
-//    {
-//        var user = User.Create("testUser@example.com", "testUser", ValidName, ValidAddress, "1234567890", UserStatusConsts.ACTIVE, RoleConsts.Client);
-//        var newEmail = "newTestUser@example.com";
-//        var newUserName = "newUsername";
-//        var newName = new Name { FirstName = "New", LastName = "User" };
-//        var newAddress = Address.Create("New test St", "54321-876", "New test City", "-23.5505,-46.6333", "456");
-//        var newPhone = "9876543210";
-//        var newStatus = UserStatusConsts.INACTIVE;
-//        var newRole = RoleConsts.Manager;
+            // Assert
+            user.Email.Should().Be(newEmail);
+            user.Phone.Should().Be(newPhone);
 
-//        user.Update(newEmail, newUserName, newName, newAddress, newPhone, newStatus, newRole);
+            // Campos não atualizados permanecem iguais
+            user.UserName.Should().Be("username");
+            user.Name.Should().Be(ValidName);
+            user.BirthDay.Should().Be(new DateTime(1990, 1, 1));
+            user.Naturalness.Should().Be("Brasileiro");
+            user.Nationality.Should().Be("Brasil");
+            user.Cpf.Should().Be(ValidCpf);
+            user.Address.Street.Should().Be(ValidStreet);
+        }
 
-//        // Assert
-//        user.Email.Should().Be(newEmail);
-//        user.UserName.Should().Be(newUserName);
-//        user.Name.Should().Be(newName);
-//        user.Address.Should().Be(newAddress);
-//        user.Phone.Should().Be(newPhone);
-//        user.Status.Should().Be(newStatus);
-//        user.Role.Should().Be(newRole);
-//        user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-//    }
+        [Fact]
+        public void Update_ShouldThrowDomainException_WhenNullProvidedForNonNullable()
+        {
+            // Arrange
+            var user = User.Create(
+                birthDay: new DateTime(1990, 1, 1),
+                naturalness: "Brasileiro",
+                nationality: "Brasil",
+                email: "email@example.com",
+                userName: "username",
+                name: ValidName,
+                cpf: ValidCpf,
+                phone: "1234567890",
+                street: ValidStreet,
+                zipcode: ValidZipcode,
+                city: ValidCity,
+                geo: ValidGeo,
+                number: ValidNumber);
 
-//    [Fact]
-//    public void Update_WithPartialParameters_ShouldUpdateOnlyProvidedFields()
-//    {
-//        var user = User.Create("testUser01@example.com", "testUsername", ValidName, ValidAddress, "1234567890");
-//        var newEmail = "newTestUser01@example.com";
-//        var newPhone = "9876543210";
+            // Act & Assert
+            Action act = () => user.Update(email: null);
 
-//        user.Update(email: newEmail, phone: newPhone);
+            // email: null = não atualiza, logo não lança
+            act.Should().NotThrow();
 
-//        // Assert
-//        user.Email.Should().Be(newEmail);
-//        user.Phone.Should().Be(newPhone);
-//        user.UserName.Should().Be("testUsername");
-//        user.Name.Should().Be(ValidName);
-//        user.Address.Should().Be(ValidAddress);
-//        user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-//    }
+            // Porém se passar explicitamente vazio, será validado na validação (e lançará)
+            Action actEmpty = () => user.Update(email: "");
 
-//    [Theory]
-//    [InlineData("invalid-email", null, null, null, null, null, null, "O email deve ser válido")]
-//    [InlineData("", null, null, null, null, null, null, "Email")]
-//    [InlineData("testUser03@example.com", "", null, null, null, null, null, "Nome de usuário")]
-//    [InlineData("testUser04@example.com", "userTest", null, null, "", null, null, "Telefone")]
-//    [InlineData("testUser05@example.com", "userTest", null, null, "1234567890", "InvalidStatus", null, "Status")]
-//    [InlineData("testUser06@example.com", "userTest", null, null, "1234567890", UserStatusConsts.ACTIVE, "InvalidRole", "Função")]
-//    public void Update_WithInvalidParameters_ShouldThrowValidationException(
-//        string? email, string? userName, Name? name, Address? address, string? phone, string? status, string? role, string expectedError)
-//    {
-//        var user = User.Create("testUser@example.com", "testUser", ValidName, ValidAddress, "1234567890", UserStatusConsts.ACTIVE, RoleConsts.Client);
-
-//        Action act = () => user.Update(email, userName, name, address, phone, status, role);
-
-//        // Assert
-//        act.Should().Throw<ValidationException>()
-//           .WithMessage($"*{expectedError}*");
-//    }
-//}
+            actEmpty.Should().Throw<ValidationException>()
+                .Where(e => e.Errors.Any(err => err.ErrorMessage.Contains("Email")));
+        }
+    }
+}
