@@ -11,13 +11,13 @@ public sealed class JwtService(IConfiguration _config) : IJwtService
 {
     private string CreateToken(List<Claim> claims)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSecret"]!));
 
         var token = new JwtSecurityToken(
-        issuer: _config["Jwt:Issuer"],
-        audience: _config["Jwt:Audience"],
+        issuer: _config["JwtIssuer"],
+        audience: _config["JwtAudience"],
         claims: claims,
-        expires: DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:ExpirationInMinutes")),
+        expires: DateTime.UtcNow.AddMinutes(_config.GetValue<int>("JwtExpirationInMinutes")),
         signingCredentials: new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256)
     );
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -33,7 +33,7 @@ public sealed class JwtService(IConfiguration _config) : IJwtService
 
     public ClaimsPrincipal ValidateJwt(string token)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSecret"]!));
         var tokenHandler = new JwtSecurityTokenHandler();
 
         var validationParameters = new TokenValidationParameters
@@ -42,8 +42,8 @@ public sealed class JwtService(IConfiguration _config) : IJwtService
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = _config["Jwt:Issuer"],
-            ValidAudience = _config["Jwt:Audience"],
+            ValidIssuer = _config["JwtIssuer"],
+            ValidAudience = _config["JwtAudience"],
             IssuerSigningKey = securityKey,
             ClockSkew = TimeSpan.Zero
         };
