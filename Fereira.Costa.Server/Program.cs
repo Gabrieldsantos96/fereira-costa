@@ -9,12 +9,16 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseKestrel(options =>
+{
+    options.ListenAnyIP(8080);
+});
+
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddWebServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
-
 builder.Services.AddResponseCompression();
 
 if (builder.Environment.IsDevelopment())
@@ -29,12 +33,10 @@ if (builder.Environment.IsDevelopment())
                   .AllowCredentials();
         });
     });
-
 }
 else
 {
     Console.WriteLine(builder.Configuration.GetValue<string>("WEBSITE_CORS_ALLOWED_ORIGINS"));
-
     Console.WriteLine(builder.Configuration.GetValue<string>("DATABASE_URI"));
 
     builder.Services.AddCors(options =>
@@ -55,25 +57,28 @@ else
 
 var app = builder.Build();
 
-
-app.UseCors();
-
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
     try
     {
+        Console.WriteLine($"Iniciando migrações às {DateTime.Now} com Connection String: {dbContext.Database.GetConnectionString()}");
         dbContext.Database.Migrate();
+        Console.WriteLine("Migrações aplicadas com sucesso às {DateTime.Now}");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Erro ao aplicar migrações: {ex.Message}");
+        Console.WriteLine($"Erro ao aplicar migrações às {DateTime.Now}: {ex.Message}");
+        Console.WriteLine($"StackTrace: {ex.StackTrace}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+        }
         throw;
     }
 }
 
 app.UseStatusCodePages();
-
 app.UseExceptionHandler();
 
 if (builder.Environment.IsProduction())
@@ -81,7 +86,8 @@ if (builder.Environment.IsProduction())
     app.UseResponseCompression();
 }
 
-app.UseRequestLocalization("pt-BR");
+app.UseRouting();
+app.UseCors();
 
 app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures("pt-BR")
@@ -90,7 +96,6 @@ app.UseRequestLocalization(new RequestLocalizationOptions()
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-
 }
 else
 {
@@ -100,7 +105,6 @@ else
 
 app.UseSwaggerGen();
 app.MapStaticAssets();
-app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
