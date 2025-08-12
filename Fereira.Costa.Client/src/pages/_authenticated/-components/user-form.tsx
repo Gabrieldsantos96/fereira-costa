@@ -20,7 +20,6 @@ import { MaskedInput } from "~/components/masked-input";
 import z from "zod";
 import { showToast } from "~/utils/trigger-toast";
 import { MessageType } from "~/services/toast-service";
-import { handleError } from "~/utils/handle-error";
 import { Link } from "@tanstack/react-router";
 import { CustomCombobox } from "~/components/ui/custom-combobox";
 import { searchMunicipalities, searchNationalities } from "~/lib/thirty-api";
@@ -135,7 +134,10 @@ export function UserForm({
         type: MessageType.Success,
       });
     } catch (error) {
-      handleError(error);
+      showToast({
+        type: MessageType.Danger,
+        text: "Erro ao salvar usuário. Por favor, tente novamente mais tarde.",
+      });
     }
   };
 

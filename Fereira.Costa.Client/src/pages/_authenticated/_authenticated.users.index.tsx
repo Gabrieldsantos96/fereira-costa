@@ -28,7 +28,6 @@ import { DestructiveDialog } from "~/components/destructive-dialog";
 import { openDialog } from "~/utils/trigger-dialog";
 import { MessageType } from "~/services/toast-service";
 import { showToast } from "~/utils/trigger-toast";
-import { handleError } from "~/utils/handle-error";
 import { applyMask } from "~/utils/apply-mask";
 import { useDebounce } from "~/hooks/use-debouce";
 
@@ -86,7 +85,10 @@ function RouteComponent() {
         });
       }
     } catch (error) {
-      handleError(error);
+      showToast({
+        type: MessageType.Danger,
+        text: "Erro ao tentar excluir usuário. Por favor, tente novamente mais tarde.",
+      });
     }
   };
 

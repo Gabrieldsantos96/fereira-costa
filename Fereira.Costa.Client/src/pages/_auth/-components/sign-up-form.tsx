@@ -36,13 +36,8 @@ import httpClient from "~/lib/http-client";
 import { Routes } from "~/constants/consts";
 import { showToast } from "~/utils/trigger-toast";
 import { MessageType } from "~/services/toast-service";
-import { handleError } from "~/utils/handle-error";
 import { MaskedInput } from "~/components/masked-input";
-import {
-  ComboBoxItemType,
-  CustomCombobox,
-} from "~/components/ui/custom-combobox";
-import { SearchResponse } from "~/hooks/tanstack-hooks/use-infinite-scroll";
+import { CustomCombobox } from "~/components/ui/custom-combobox";
 import {
   Popover,
   PopoverContent,
@@ -203,7 +198,10 @@ export function SignUpFormSteps() {
         text: "Conta criada com sucesso",
       });
     } catch (error) {
-      handleError(error);
+      showToast({
+        type: MessageType.Danger,
+        text: "Erro ao criar conta. Por favor, tente novamente mais tarde.",
+      });
     }
   }
 

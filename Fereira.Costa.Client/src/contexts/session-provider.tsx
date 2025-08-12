@@ -10,7 +10,6 @@ import { useProfile } from "~/hooks/tanstack-hooks/use-profile";
 import { useSignOut } from "~/hooks/tanstack-hooks/use-sign-out";
 import { useSignIn } from "~/hooks/tanstack-hooks/use-sign-in";
 import { queryClient } from "~/lib/tanstack-query";
-import { handleError } from "~/utils/handle-error";
 import {
   createContext,
   useContext,
@@ -21,6 +20,8 @@ import {
   type PropsWithChildren,
 } from "react";
 import httpClient from "~/lib/http-client";
+import { showToast } from "~/utils/trigger-toast";
+import { MessageType } from "~/services/toast-service";
 
 type AuthState = {
   isFetching: boolean;
@@ -141,7 +142,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
       setSignedIn(true);
     } catch (error) {
-      handleError(error);
+      showToast({
+        type: MessageType.Danger,
+        text: "Erro ao tentar fazer login. Por favor, tente novamente mais tarde.",
+      });
     }
   }, []);
 
