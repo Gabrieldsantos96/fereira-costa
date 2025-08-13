@@ -54,6 +54,7 @@
 ### Backend
 
 - **Padrões e Bibliotecas**:
+  - Por segurança os erros não estão sendo expostos no client ( Enxergar exceptions somente no Azure Monitor/Application Insights )
   - Padrão Mediator para comunicação entre camadas
   - Fluent Validations para validação de dados
   - Entity Framework como ORM para interação com o banco de dados
