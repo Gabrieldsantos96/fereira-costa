@@ -116,7 +116,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         localStorage.setItem(AUTH_STORAGE_KEY, result.data.accessToken);
         localStorage.setItem(
           REFRESH_TOKEN_STORAGE_KEY,
-          result.data.refreshToken
+          result.data.refreshTokenHash
         );
 
         return httpClient(originalRequest);
