@@ -27,6 +27,8 @@
 
 ### 4. Deploy em Produção
 
+- OBS: Azure SQL Server está em um ambiente serverless por se tratar de um instancia free tier, isso implica que a primeira request pode demorar mais do que o normal por causa do cold start.
+
 - O projeto já está configurado com pipeline de **CI/CD** via **Azure DevOps**, garantindo deploys automáticos, testes e entrega contínua em ambiente de produção.
 
 ## Detalhes do Projeto
