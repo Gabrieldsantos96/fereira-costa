@@ -1,11 +1,11 @@
 version: "3.9"
 
 services:
-  Fereira.Costa.server:
+  Node.server:
     image: ${DOCKER_REGISTRY:-}developerevaluationserver
     build:
       context: .
-      dockerfile: Fereira.Costa.Server/Dockerfile
+      dockerfile: Node.Server/Dockerfile
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -22,25 +22,25 @@ services:
     links:
       - sqlserver
 
-  Fereira.Costa.client:
+  Node.client:
     image: ${DOCKER_REGISTRY:-}developerevaluationclient
     build:
-      context: ./Fereira.Costa.client
+      context: ./Node.client
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
     volumes:
-      - ./Fereira.Costa.client:/usr/src/app
+      - ./Node.client:/usr/src/app
       - /usr/src/app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
       - DEV_SERVER_PORT=5173
     depends_on:
-      - Fereira.Costa.server
+      - Node.server
     networks:
       - app-frontend
     links:
-      - Fereira.Costa.server
+      - Node.server
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest

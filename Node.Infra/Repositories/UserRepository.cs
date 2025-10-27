@@ -1,0 +1,85 @@
+﻿using Node.Domain.Entities;
+using Node.Domain.Exceptions;
+using Node.Domain.Infrastructure.Interfaces.Adapters;
+using Node.Domain.Infrastructure.Interfaces.Repositories;
+using Node.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
+
+namespace Node.Infra.Repositories;
+public sealed class UserRepository(IDatabaseContextFactory databaseContextFactory) : IUserRepository
+{
+    public async Task<User?> GetUserAsync(Guid refId, CancellationToken ct)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+
+        return await ctx.Users.AsNoTracking()
+             .FirstOrDefaultAsync(u => u.RefId == refId, ct) ?? throw new NotFoundException(nameof(User));
+    }
+
+    public async Task<User?> CheckCpfAsync(string cpf, CancellationToken ct)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+
+        return await ctx.Users.AsNoTracking()
+             .FirstOrDefaultAsync(u => u.Cpf!.Value == cpf, ct);
+    }
+
+    public async Task<User?> GetUserAsync(string email, CancellationToken ct)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+
+        return await ctx.Users.AsNoTracking()
+             .FirstOrDefaultAsync(u => u.Email == email, ct) ?? throw new NotFoundException(nameof(User));
+    }
+
+    public async Task<PaginatedResponse<User>> GetPaginatedUsersAsync(int skip = 0, int take = 20, string? filter = null, CancellationToken ct = default)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+
+        var query = ctx.Users.AsNoTracking()
+            .OrderByDescending(s => s.CreatedAt);
+
+        var totalItems = await query.CountAsync(ct);
+        var users = await query.Skip(skip).Take(take).ToListAsync(ct);
+
+        var totalPages = (int)Math.Ceiling(totalItems / (double)take);
+
+        return new PaginatedResponse<User>(users, totalItems, (int)Math.Ceiling((skip + 1) / (double)take), totalPages);
+    }
+
+    public async Task DeleteUserAsync(Guid userRefId)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+        var user = await ctx.Users
+       .AsTracking()
+       .FirstOrDefaultAsync(u => u.RefId == userRefId);
+
+        if (user is null)
+            throw new NotFoundException(nameof(User));
+
+        ctx.Users.Remove(user);
+
+        await ctx.SaveChangesAsync();
+    }
+
+    public async Task UpsertUserAsync(User user, CancellationToken ct)
+    {
+        await using var ctx = await databaseContextFactory.CreateDbContextAsync();
+
+        var existing = await ctx.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.RefId == user.RefId, ct);
+
+        if (existing is null)
+        {
+            await ctx.Users.AddAsync(user, ct);
+        }
+        else
+        {
+            ctx.Users.Update(user);
+        }
+
+        await ctx.SaveChangesAsync(ct);
+    }
+
+}
